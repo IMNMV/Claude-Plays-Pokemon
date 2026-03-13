@@ -16,6 +16,12 @@ The motivating question for the broader analysis was:
 
 > Given a message with characteristic X, from user Y, at time point Z, what is the probability that it contains anthropomorphization?
 
+## Hypothesis And Why Mt. Moon
+
+The Mt. Moon segment of the stream was especially useful because it contained extended failure, repeated loops, visible planning, and long stretches where viewers debated what Claude "thought" was happening. That made it a strong observational setting for studying collective anthropomorphization in real time.
+
+The main hypothesis was derived from two strands of prior work. First, the anthropomorphism literature suggests that people readily project minds onto non-human agents, especially when behavior looks goal-directed or hard to explain. Second, work on mental-state attribution suggests that observers track beliefs, mistakes, and updates when interpreting an agent's actions. Translating that into the Twitch setting led to a simple prediction: messages tagged as `False_Belief` or related model-state errors should be especially likely to also contain anthropomorphization.
+
 ## How The Dataset Was Created
 
 The raw chat was scraped from the `Claude Plays Pokemon` Twitch stream and converted into a dataset containing messages, usernames, channels, and timestamps. I then used the Gemini 2.0 Flash Thinking Experiment (`01-21`) model via API to annotate 107k messages spanning a three-day period.
@@ -23,6 +29,31 @@ The raw chat was scraped from the `Claude Plays Pokemon` Twitch stream and conve
 I was especially interested in the Mt. Moon arc, where Claude was stuck in a relatively simple maze for an extended period. To preserve conversational context during annotation, I used a 5-minute sliding window and prompted Gemini on chunks of nearby chat messages rather than rating each message fully independently. This created several hundred overlapping prompt windows. That approach was a proof-of-concept method: it improved contextual awareness, but it also introduced the usual tradeoffs around window boundaries and prompt length.
 
 Across the full corpus, 34 binary annotation dimensions were generated. The current write-up and most downstream analyses focus on a subset of dimensions related to chat behavior, model-state interpretation, and anthropomorphization.
+
+## Modeling Strategy
+
+The full annotation file contains 107,145 messages. The example analyses and figures in this repository focus on the Mt. Moon subset through Claude's first exit from the cave (`N = 88,589`).
+
+For modeling, the four anthropomorphization dimensions were collapsed into a binary composite outcome:
+
+- `anthro_composite = 1` if a message contained any of `Anthro_Cognitive`, `Anthro_Emotional`, `Anthro_Intentional`, or `Anthro_Social`
+- `anthro_composite = 0` otherwise
+
+The primary Bayesian models were mixed-effects logistic regressions that predicted whether an individual message contained this anthropomorphization composite. The fixed effects were:
+
+- `Chat_Frustration`
+- `Chat_Enthusiasm`
+- `Belief_Update`
+- `Chat_Speculating`
+- `Getting_Stuck`
+- `Stuck_In_Loop`
+- `Incorrect_Assumption`
+- `False_Belief`
+- a smooth term for time, `s(mins_elapsed)`
+
+To account for repeated posting by the same people, the models also included a random intercept for `username`, allowing users to vary in their baseline tendency to anthropomorphize. Three versions of the same model were fit with weak, moderate, and strong priors in order to check whether the key relationships were robust to different levels of prior skepticism.
+
+These models were used to estimate predicted probabilities and odds-ratio-style effect sizes for the main figures below. They support associational interpretation, not causal claims.
 
 ## Focal Dimensions
 
