@@ -69,6 +69,34 @@ The annotated data was validated with a manually reviewed sample of 360 annotate
 - Format: CSV
 - Intended use: descriptive analysis, annotation validation, and modeling of anthropomorphization in chat messages
 
+## Example Findings
+
+The figures below come from the Mt. Moon analysis subset (`N = 88,589`) and are included as examples of downstream descriptive and model-based results.
+
+### Anthropomorphization Types Over Time
+
+Anthropomorphization in the chat was driven most strongly by cognitive language, with emotional, intentional, and social anthropomorphization appearing less often.
+
+![Anthropomorphization Types Over Time](figures/anthro_types_time_plot.png)
+
+### False Belief And Anthropomorphization Over Time
+
+Messages tagged as `False_Belief` were consistently more likely to also contain anthropomorphization than messages without that tag.
+
+![False Belief And Anthropomorphization Over Time](figures/false_belief_time_plot.png)
+
+### Predictor Prevalence
+
+`False_Belief` was relatively rare in the full Mt. Moon subset, which makes its strong association with anthropomorphization notable.
+
+![Predictor Prevalence](figures/predictor_prevalence_plot.png)
+
+### Model-Predicted Effect Of False Belief
+
+Across Bayesian mixed-effects models with different priors, messages tagged as `False_Belief` had a substantially higher predicted probability of anthropomorphization.
+
+![Model-Predicted Effect Of False Belief](figures/false_belief_effects_plot.png)
+
 ## Selected References
 
 - Anthropic. (2025a). Can Claude play Pokemon? https://x.com/AnthropicAI/status/1894419011569344978
