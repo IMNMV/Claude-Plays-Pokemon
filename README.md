@@ -1,5 +1,7 @@
 # A First Step Into Collective Anthropomorphization
 
+**Read the full writeup:** [nykkovitali.com/Claude-Plays-Pokemon/](http://nykkovitali.com/Claude-Plays-Pokemon/)
+
 This repository contains a de-identified annotation dataset from a Claude Plays Pokemon chat corpus.
 
 ## Included File
