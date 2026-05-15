@@ -1,6 +1,15 @@
 project:
   type: website
   output-dir: docs
+  render:
+    - index.qmd
+
+bibliography: references.bib
+suppress-bibliography: true
+link-citations: false
+
+execute:
+  freeze: auto
 
 website:
   title: "Collective Anthropomorphization"
