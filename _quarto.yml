@@ -1,0 +1,28 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "Collective Anthropomorphization"
+  site-url: "https://imnmv.github.io/Claude-Plays-Pokemon/"
+  repo-url: "https://github.com/IMNMV/Claude-Plays-Pokemon"
+  repo-actions: [edit, issue]
+  page-navigation: true
+
+format:
+  html:
+    theme:
+      light: cosmo
+      dark: darkly
+    toc: true
+    toc-location: right
+    toc-depth: 3
+    code-fold: true
+    fig-cap-location: bottom
+    fig-align: center
+    smooth-scroll: true
+    anchor-sections: true
+    link-external-newwindow: true
+    link-external-icon: true
+    grid:
+      body-width: 850px
