@@ -12,9 +12,9 @@ abstract-title: "TL;DR"
 
 This semester, for a term paper, we could write about any topic we wanted as long as it pertained to the themes in the course (seminar in social psychology). I decided to draft a proposal on anthropomorphization on the reasoning traces of LLMs.
 
-What spurred my interest in the topic formed a year ago when Anthropic released Claude Sonnet 3.7 playing Pokémon Red on Twitch. It was a fun benchmark to demonstrate its 'reasoning' capabilities in a long-running task that incorporated spatial navigation and decision making. As cool as it was from an AI progress perspective, I thought it would be a unique opportunity to study how people anthropomorphize an LLM collectively given it had never been done before in this context, to my knowledge.
+What spurred my interest in the topic formed a year ago when Anthropic released Claude 3.7 Sonnet playing Pokémon Red on Twitch. It was a fun benchmark to demonstrate its 'reasoning' capabilities in a long-running task that incorporated spatial navigation and decision making. As cool as it was from an AI progress perspective, I thought it would be a unique opportunity to study how people anthropomorphize an LLM collectively given it had never been done before in this context, to my knowledge.
 
-I found it especially intriguing that the reasoning trace was visible to the audience and I hypothesized that this would influence anthropomorphic perceptions more than otherwise would have occurred had people simply watched Claude navigate the 2D game. For several weeks I used the API to pull messages from the chat. I was primarily interested in the Mt. Moon period where it was stuck in the classic maze for three days trying its darnedest to get out. Focusing on that period, I gathered up ~107k messages and fed them to Gemini 1.5 Pro through the API to analyze for numerous features such as cognitive anthropomorphism, if Claude exhibited a false belief (inspired by the inverse planning theory of mind literature), if it was stuck, if it had just caught a Pokémon, etc.
+I found it especially intriguing that the reasoning trace was visible to the audience and I hypothesized that this would influence anthropomorphic perceptions more than otherwise would have occurred had people simply watched Claude navigate the 2D game. For several weeks I used the API to pull messages from the chat. I was primarily interested in the Mt. Moon period where it was stuck in the classic maze for three days trying its darnedest to get out. Focusing on that period, I gathered up ~107k messages and fed them to Gemini 1.5 Pro through the API to analyze for numerous features such as cognitive anthropomorphism, whether Claude exhibited a false belief (inspired by the inverse planning theory of mind literature), whether it was stuck, whether it had just caught a Pokémon, etc.
 
 The de-identified annotated dataset is available here: [github.com/IMNMV/Claude-Plays-Pokemon](https://github.com/IMNMV/Claude-Plays-Pokemon).
 
@@ -28,7 +28,7 @@ For example, imagine writing an essay. The essay can then be described through n
 
 ## How'd you do it?
 
-I used Qwen's 8B parameter embedding model to convert my dataset to embeddings, then used SAEs to identify recurring frames in how people interpreted Claude's behavior to get more granular frames. To achieve an interpretable number of features (26), I only retained those that were adequately present, stable across random seeds, and coherent in their top activation examples. I then had Gemini 3.1 Pro annotate random subsets of the top activations to assign the unique frames their own categorical label.
+I used Qwen's 8B-parameter embedding model to convert my dataset to embeddings, then used SAEs to identify recurring frames in how people interpreted Claude's behavior to get more granular frames. To achieve an interpretable number of features (26), I only retained those that were adequately present, stable across random seeds, and coherent in their top activation examples. I then had Gemini 3.1 Pro annotate random subsets of the top activations to assign the unique frames their own categorical label.
 
 To my surprise, it worked quite well, and some really neat patterns shook out.
 
@@ -68,7 +68,7 @@ The last image compares a BERTopic model's topic outputs alongside the SAE outpu
 
 ## Ok, cool, so what?
 
-Anthropomorphism is a default way we attribute mind qualities to all classes of entities. This much is known and is well-trodden within the field. What I find more interesting is that the anthropomorphism was *structured*, and this structure can be teased apart with textual and regression analyses that current explorations in the field haven't done. We saw that viewers projected different mind-attribution frames depending on what Claude was doing, and how successful it was. When Claude failed, people then attempted to explain/understand these failures through agency/process frames. On the other hand, BERTopic helped identify the global semantic context throughout its gameplay, but SAE helped identify the psychological construals within those contexts.
+Anthropomorphism is a default way we attribute mind qualities to all classes of entities. This much is known and is well-trodden within the field. What I find more interesting is that the anthropomorphism was *structured*, and this structure can be teased apart with textual and regression analyses that current explorations in the field haven't done. We saw that viewers projected different mind-attribution frames depending on what Claude was doing, and how successful it was. When Claude failed, people then attempted to explain/understand these failures through agency/process frames. On the other hand, BERTopic helped identify the global semantic context throughout its gameplay, but SAEs helped identify the psychological construals within those contexts.
 
 ## References {.unnumbered}
 
