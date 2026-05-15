@@ -80,9 +80,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-bedb7b8ee13e80663b2dfd715f96a81e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-3df0db9cc2207bc455aace1d1a18369e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-bedb7b8ee13e80663b2dfd715f96a81e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-b341f558c784c968e8f4e0fd58f91907.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-3c4faa3ece5e0bb79ac952bc8f65c0d1.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-b341f558c784c968e8f4e0fd58f91907.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -313,6 +313,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#background" id="toc-background" class="nav-link" data-scroll-target="#background">Background</a></li>
   <li><a href="#howd-you-do-it" id="toc-howd-you-do-it" class="nav-link" data-scroll-target="#howd-you-do-it">How’d you do it?</a></li>
+  <li><a href="#pipeline" id="toc-pipeline" class="nav-link" data-scroll-target="#pipeline">Pipeline</a>
+  <ul class="collapse">
+  <li><a href="#data-preparation-and-embedding" id="toc-data-preparation-and-embedding" class="nav-link" data-scroll-target="#data-preparation-and-embedding">Data preparation and embedding</a></li>
+  <li><a href="#sparse-autoencoder-pipeline" id="toc-sparse-autoencoder-pipeline" class="nav-link" data-scroll-target="#sparse-autoencoder-pipeline">Sparse autoencoder pipeline</a></li>
+  <li><a href="#statistical-analysis-and-theory-mapping" id="toc-statistical-analysis-and-theory-mapping" class="nav-link" data-scroll-target="#statistical-analysis-and-theory-mapping">Statistical analysis and theory mapping</a></li>
+  <li><a href="#bertopic-comparison" id="toc-bertopic-comparison" class="nav-link" data-scroll-target="#bertopic-comparison">BERTopic comparison</a></li>
+  </ul></li>
   <li><a href="#what-the-sae-frames-revealed" id="toc-what-the-sae-frames-revealed" class="nav-link" data-scroll-target="#what-the-sae-frames-revealed">What the SAE frames revealed</a></li>
   <li><a href="#false-beliefs-and-how-viewers-explain-failure" id="toc-false-beliefs-and-how-viewers-explain-failure" class="nav-link" data-scroll-target="#false-beliefs-and-how-viewers-explain-failure">False beliefs and how viewers explain failure</a></li>
   <li><a href="#mapping-onto-agency-vs.-experience" id="toc-mapping-onto-agency-vs.-experience" class="nav-link" data-scroll-target="#mapping-onto-agency-vs.-experience">Mapping onto agency vs.&nbsp;experience</a></li>
@@ -881,18 +888,33 @@ anthropomorphization_model          -279.8      21.9 </code></pre>
 <p>I used Qwen’s 8B-parameter embedding model to convert my dataset to embeddings, then used SAEs to identify recurring frames in how people interpreted Claude’s behavior to get more granular frames. To achieve an interpretable number of features (26), I only retained those that were adequately present, stable across random seeds, and coherent in their top activation examples. I then had Gemini 3.1 Pro annotate random subsets of the top activations to assign the unique frames their own categorical label.</p>
 <p>To my surprise, it worked quite well, and some really neat patterns shook out.</p>
 </section>
+<section id="pipeline" class="level2">
+<h2 class="anchored" data-anchor-id="pipeline">Pipeline</h2>
+<section id="data-preparation-and-embedding" class="level3">
+<h3 class="anchored" data-anchor-id="data-preparation-and-embedding">Data preparation and embedding</h3>
+<p>I extracted ~107,145 messages from the “Claude Plays Pokemon” Twitch chat. Messages were scored for presence/absence of anthropomorphic labeling, and game state metadata was used to flag moments where Claude explicitly held a “False Belief” (e.g., misinterpreting the game map or hallucinating inventory items). I passed the raw text of all 107k messages through the Qwen/Qwen3-Embedding-8B model, producing dense 4096-dimensional representations of each message.</p>
+</section>
+<section id="sparse-autoencoder-pipeline" class="level3">
+<h3 class="anchored" data-anchor-id="sparse-autoencoder-pipeline">Sparse autoencoder pipeline</h3>
+<p>I trained a Top-K Sparse Autoencoder (K=64, Hidden Dimension=16,384) on the Qwen embeddings to isolate candidate interpretable latent features. To reduce the chance that results reflected random initialization, I trained three independent SAE models using different random seeds (42, 123, 999). I matched features across seeds using activation-pattern similarity and top-activating-message overlap (Jaccard) and retained features that recurred across multiple seeds. (NPMI was later used separately to quantify initial theme enrichment with anthropomorphism and false-belief labels.) I excluded very low-support features, requiring at least 30 active messages for inclusion in the main analysis, to avoid unstable enrichment estimates. I inspected the top-activating messages and contrast examples for the cross-seed stable features, and labeled 26 recurring features as distinct psychological frames, representing Theory of Mind attributions and emotional projections (e.g., “Meta-Reasoning,” “Dementia Pity,” “Sisyphus Copypasta”).</p>
+</section>
+<section id="statistical-analysis-and-theory-mapping" class="level3">
+<h3 class="anchored" data-anchor-id="statistical-analysis-and-theory-mapping">Statistical analysis and theory mapping</h3>
+<p>For each of the 26 SAE themes, I ran independent logistic regressions predicting whether a message was anthropomorphically labeled, and separately testing whether each SAE theme was associated with false-belief-coded messages. These models controlled for word count, message length, and elapsed time. I applied the Benjamini-Hochberg False Discovery Rate (FDR) correction within each analysis family to control for multiple comparisons. I theoretically mapped the 26 SAE themes onto the dimensions of Agency (Capacity for Intent) and Experience (Capacity to Feel) based on Gray &amp; Wegner’s (2007) framework.</p>
+</section>
+<section id="bertopic-comparison" class="level3">
+<h3 class="anchored" data-anchor-id="bertopic-comparison">BERTopic comparison</h3>
+<p>As a baseline comparison, I ran BERTopic on the identical Qwen-8B embeddings. BERTopic assigned documents to primary semantic clusters (with some messages left as unclustered outliers). I isolated the largest game-event semantic clusters identified by BERTopic (Topic 1: Mt. Moon, Topic 2: Zubats, Topic 4: Fossils) and the largest AI-focused semantic clusters (Topic 3: AGI, Topic 6: Context Wipes, Topic 7: Infinite Loops, Topic 11: LLM Memory/Amnesia). I calculated the fold-enrichment of the 26 SAE themes within these specific BERTopic clusters relative to the corpus baseline, producing a faceted bar chart demonstrating that BERTopic primarily recovered semantic/event clusters, while SAE-derived themes captured psychological frames within and across those clusters (e.g., showing that discussions of “Mt. Moon” were characterized by oscillating frames of “Goal-Directed Intent” and “Dementia Pity”).</p>
+</section>
+</section>
 <section id="what-the-sae-frames-revealed" class="level2">
 <h2 class="anchored" data-anchor-id="what-the-sae-frames-revealed">What the SAE frames revealed</h2>
 <p>First, initially I used Gemini to annotate four different types of anthropomorphic projection (cognitive, emotional, intentional and social). However, the latent frames that emerged from the SAE showed that people anthropomorphized in a variety of ways. For example, reacting to Claude’s <code>&lt;thinking&gt;</code> traces, projecting an explorer archetype onto it, giving it emotional support / pitying it when it was stuck, as well as even projecting affection when it did cute things such as name its Pokémon. The viewers gave it a wide variety of mind-attributions that my simplistic global labels failed to capture.</p>
 <p>The first image shows the SAE latent thematic frames that are most strongly associated with the Gemini-coded anthropomorphic messages. Each point is an odds ratio from a logistic regression predicting whether a chat message was labeled anthropomorphic while controlling for message length, word count, and time. Error bars show 95% confidence intervals, and p-values were corrected using FDR correction.</p>
-<div id="fig-anthro" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Forest plot of odds ratios for SAE-derived latent themes predicting anthropomorphic labeling.">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-anthro-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/paper_figures/image1_plot1_anthro_final_v9_USE.png" class="img-fluid figure-img" alt="Forest plot of odds ratios for SAE-derived latent themes predicting anthropomorphic labeling.">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-anthro-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: SAE-derived latent themes associated with anthropomorphic labeling.
-</figcaption>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/paper_figures/image1_plot1_anthro_final_v9_USE.png" class="img-fluid figure-img" alt="Forest plot of odds ratios for SAE-derived latent themes predicting anthropomorphic labeling."></p>
+<figcaption>SAE-derived latent themes associated with anthropomorphic labeling.</figcaption>
 </figure>
 </div>
 <p>What I find most interesting about this plot is that we can see specific frames of language show more variation than simple global labels would describe. For example, there were a lot of discussions/banter about Claude’s <code>&lt;thinking&gt;</code> trace (which was displayed on the screen before it reasoned via text), projections where Claude is an explorer in a new world forging a path, or projection of pity when it showed signs of confusion with its inability to make significant progress in the maze. Or, put another way, the SAE split anthropomorphism into cleaner interpretive frames than my global annotation categories.</p>
@@ -901,14 +923,10 @@ Figure&nbsp;1: SAE-derived latent themes associated with anthropomorphic labelin
 <h2 class="anchored" data-anchor-id="false-beliefs-and-how-viewers-explain-failure">False beliefs and how viewers explain failure</h2>
 <p>Second, false-belief events changed the type of anthropomorphic projection people applied. I was interested in false-belief messages because work by Baker et al.&nbsp;(2017) suggests that observers explain agents’ actions by inferring what the agent represents/believes about the world. These events, which were coded by Gemini 1.5 Pro, occurred when viewers interpreted Claude’s behavior as a misunderstanding of the game state. Given that Claude’s actions were constrained by the constant context distillation, as well as its poor image understanding capabilities, I thought this would be a prime candidate for mind-attribution.</p>
 <p>The second image asks, of the various SAE frames, which were strongly associated with events where viewers believed Claude acted from a false belief? An earlier analysis showed false belief as the strongest predictor of any anthropomorphic language, but I wasn’t able to understand what ways people spoke about false beliefs when they happened. Like before, each point is an odds ratio from a logistic regression predicting whether a message occurred in a false-belief context, while controlling for message length, word count, and time. Error bars show 95% confidence intervals, and p-values were corrected using FDR correction.</p>
-<div id="fig-fb" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Forest plot showing which SAE-derived frames are most associated with false-belief events.">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-fb-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/paper_figures/image2_plot2_fb_final_v9_USE.png" class="img-fluid figure-img" alt="Forest plot showing which SAE-derived frames are most associated with false-belief events.">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-fb-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: False-belief events are associated with specific anthropomorphic frames.
-</figcaption>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/paper_figures/image2_plot2_fb_final_v9_USE.png" class="img-fluid figure-img" alt="Forest plot showing which SAE-derived frames are most associated with false-belief events."></p>
+<figcaption>False-belief events are associated with specific anthropomorphic frames.</figcaption>
 </figure>
 </div>
 <p>We can see that when Claude failed, the most consistent themes drifted from the generic affection-aligned responses from the previous analysis. Instead these were geared toward how people spoke about Claude’s reasoning ability, the consistent looping and its awareness that it was looping but still unable to correct itself, and how, despite its impressive capabilities, its amnestic ceiling crippled its ability to progress.</p>
@@ -916,14 +934,10 @@ Figure&nbsp;2: False-belief events are associated with specific anthropomorphic 
 <section id="mapping-onto-agency-vs.-experience" class="level2">
 <h2 class="anchored" data-anchor-id="mapping-onto-agency-vs.-experience">Mapping onto agency vs.&nbsp;experience</h2>
 <p>Third, I wanted to map these results onto the classic agency vs.&nbsp;experience dimensions. This part of the analysis is the most qualitative, and open to interpretation, but bear with me. Gemini 3.1 Pro via the Gemini CLI mapped the 26 SAE themes to the amount of agency and experience they exhibited on a 1–5 scale, where higher values indicated more of that dimension. For example, Gemini rated ascribed intelligence at a 5.0 on agency but 1.0 on experience, putting it in the bottom right quadrant of the third image. In an ideal world, one would run these multiple times with multiple models alongside human raters, but given this was a fun little exploration, this will do just fine. In this corpus, Claude’s failures were, descriptively, associated with less affection-based responses and more geared toward framing it from an agency/process lens, with the most prominent being reasoning, looping, analyzing its decision process and overall goal intention. The x-axis represents perceived agency (e.g., planning, reasoning, intention, control, and competence). The y-axis represents perceived experience (e.g., feeling, vulnerability, suffering, affection, etc.).</p>
-<div id="fig-theory" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Scatter of SAE themes plotted on agency and experience dimensions.">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-theory-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/paper_figures/image3_theory_space_final_v7_USE.png" class="img-fluid figure-img" alt="Scatter of SAE themes plotted on agency and experience dimensions.">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-theory-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: Agency vs.&nbsp;experience: SAE themes mapped onto the Gray/Wegner dimensions.
-</figcaption>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/paper_figures/image3_theory_space_final_v7_USE.png" class="img-fluid figure-img" alt="Scatter of SAE themes plotted on agency and experience dimensions."></p>
+<figcaption>Agency vs.&nbsp;experience: SAE themes mapped onto the Gray/Wegner dimensions.</figcaption>
 </figure>
 </div>
 </section>
@@ -931,14 +945,10 @@ Figure&nbsp;3: Agency vs.&nbsp;experience: SAE themes mapped onto the Gray/Wegne
 <h2 class="anchored" data-anchor-id="sae-frames-vs.-bertopic-semantic-topics">SAE frames vs.&nbsp;BERTopic semantic topics</h2>
 <p>And, finally, I wanted to compare SAE frames with BERT-derived topics. After looking at the top clusters BERT found, I included the SAE results to show the difference in granularity each method provides. SAE gave what psychological frames appeared within the semantic topics. That is, the same gameplay topic could also contain people talking about amnesia framing, Sisyphus framing (i.e., Claude must imagine itself to be the type of model to overcome the boulder, lol), goal-directed intent, or pity towards its failures. Therefore, the overall semantic topic tells us <em>what</em> the chat was talking about, but, to go one level deeper, the SAEs reveal <em>how</em> the chat was construing their perceptions of Claude.</p>
 <p>The last image compares a BERTopic model’s topic outputs alongside the SAE outputs. BERTopic was run on the same Qwen embeddings and the highest prevalent semantic topics that were found were Claude (e.g., literally people saying Claude’s name), Mt. Moon (the three-day maze it was in), Zubats (which are an extremely frequent encounter in Mt. Moon), AGI (mostly meant as a meme), and Fossils (you receive one at the end of the maze). Within each BERTopic-defined topic, I calculated how common each SAE frame was relative to its corpus-specific baseline. The x-axis shows relative prevalence vs.&nbsp;the corpus baseline. A value of 1 means the frame appears at the expected rate, whereas values above 1 mean the frame is more common inside that BERTopic than expected. This dualistic framing lets us see clearly what both approaches offer. BERTopic identified what topics the chat talked about at a high level, whereas SAE identified how viewers were psychologically construing Claude inside those topics, as the same semantic topic could contain multiple psychological frames.</p>
-<div id="fig-bertopic" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Per-topic relative prevalence of SAE frames across the top BERTopic topics.">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-bertopic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/paper_figures/image4_bertopic_sae_enrichment_top5_final_USE.png" class="img-fluid figure-img" alt="Per-topic relative prevalence of SAE frames across the top BERTopic topics.">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bertopic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4: Psychological frames within the largest BERTopic semantic topics.
-</figcaption>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/paper_figures/image4_bertopic_sae_enrichment_top5_final_USE.png" class="img-fluid figure-img" alt="Per-topic relative prevalence of SAE frames across the top BERTopic topics."></p>
+<figcaption>Psychological frames within the largest BERTopic semantic topics.</figcaption>
 </figure>
 </div>
 </section>
